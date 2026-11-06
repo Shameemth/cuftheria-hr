@@ -1,0 +1,16 @@
+{
+  "name": "Restaurant Control",
+  "short_name": "Restaurant",
+  "description": "Employees, daily sales, expenses, reports and passport/visa alerts",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8f2e8",
+  "theme_color": "#2a1c14",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2a1c14">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Restaurant Control">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Restaurant Control</title>
+<style>
+:root{--bg:#f8f2e8;--card:#fffdf9;--ink:#2a1c14;--mute:#7b6b5e;--line:#e9dfcf;--side:#2a1c14;--brand:#b8392a;--brand2:#922b1f;--gold:#e3a03a;--olive:#5d7a3b;--bad:#b8392a;--warn:#b97a0b;--ok:#4d7a2a}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:700}
+button{font:inherit;border:0;border-radius:8px;padding:9px 15px;cursor:pointer;background:var(--brand);color:#fff;font-weight:600}
+button:hover{background:var(--brand2)}
+button.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}button.sec:hover{background:#f3ece0}
+button.danger{background:#fff;color:var(--bad);border:1px solid #e6c2bc}button.danger:hover{background:#faeae7}
+button.sm{padding:5px 10px;font-size:13px}
+input,select,textarea{font:inherit;width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+label{font-size:12px;color:var(--mute);display:block;margin:10px 0 4px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--side);color:#f3e7d6;padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.logo svg{width:38px;height:38px;flex:none}
+.logo b{font-family:Georgia,serif;font-size:19px;color:#fff;line-height:1.1;display:block}
+.logo small{display:block;color:var(--gold);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{background:transparent;color:#e8d9c4;text-align:left;font-weight:500;padding:10px 12px;display:flex;gap:10px;align-items:center}
+nav button:hover{background:rgba(255,255,255,.07)}
+nav button.on{background:var(--brand);color:#fff}
+.sidefoot{margin-top:auto;font-size:13px;padding:8px;color:#cdb99f;border-top:1px solid rgba(255,255,255,.12)}
+.sidefoot button{margin-top:8px;width:100%;background:rgba(255,255,255,.1)}
+main{padding:22px 26px 60px;max-width:1180px;width:100%}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.top h2{margin:0;font-size:26px;flex:1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(60,40,20,.04)}
+.card h3{margin:0 0 10px;font-size:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}.row>*{flex:1;min-width:130px}.row>.auto{flex:0 0 auto;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:0 14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;border-top:4px solid var(--gold)}
+.kpi.r{border-top-color:var(--brand)}.kpi.g{border-top-color:var(--olive)}.kpi.d{border-top-color:var(--ink)}
+.kpi small{color:var(--mute);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.05em}
+.kpi b{display:block;font-family:Georgia,serif;font-size:26px;margin-top:4px}
+.kpi span{font-size:12px;color:var(--mute)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.tot td{font-weight:700;background:#f6eedf;border-top:2px solid var(--ink)}
+tr.click{cursor:pointer}tr.click:hover{background:#fbf3e6}
+.scroll{overflow-x:auto}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:#efe7d8;white-space:nowrap}
+.tag.bad{background:#f8dcd7;color:var(--bad)}.tag.warn{background:#faecc6;color:#8a5a00}.tag.ok{background:#dcebcd;color:var(--ok)}
+.pos{color:var(--ok);font-weight:600}.neg{color:var(--bad);font-weight:600}
+.muted{color:var(--mute);font-size:13px}
+.err{color:var(--bad);font-size:14px;min-height:20px;margin:8px 0 0}
+.okmsg{color:var(--ok);font-size:14px;margin:8px 0 0}
+.bars{display:flex;align-items:flex-end;gap:5px;height:150px;padding-top:8px}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;font-size:10px;color:var(--mute)}
+.bars i{display:block;width:100%;background:linear-gradient(var(--gold),var(--brand));border-radius:4px 4px 0 0;min-height:2px}
+.hbar{height:8px;background:#efe7d8;border-radius:5px;overflow:hidden;min-width:80px}.hbar i{display:block;height:100%;background:var(--olive)}
+.detail dl{display:grid;grid-template-columns:150px 1fr;gap:7px 14px;margin:0 0 6px}.detail dt{color:var(--mute);font-size:13px}.detail dd{margin:0}
+.detail h3{margin:18px 0 8px;color:var(--brand);font-size:15px;text-transform:uppercase;letter-spacing:.05em;font-family:system-ui}
+.login{min-height:100vh;display:grid;place-items:center;background:radial-gradient(circle at 20% 10%,#4a2e1d,#2a1c14 60%);padding:16px}
+.login .card{width:100%;max-width:370px;padding:26px}
+.login .logo{justify-content:center;flex-direction:column;padding-bottom:14px;text-align:center;color:var(--ink)}
+.login .logo b{color:var(--ink);font-size:28px}.login .logo svg{width:56px;height:56px}
+.hide{display:none!important}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 2px}
+.chips button{padding:6px 12px;font-size:13px}
+.pill{display:inline-block;margin:2px 4px 2px 0;padding:3px 10px;background:#f8dcd7;color:var(--bad);border-radius:99px;font-size:12px}
+.mobtop{display:none}
+@media(max-width:820px){
+ .shell{grid-template-columns:1fr}
+ aside{position:static;height:auto;padding:10px;flex-direction:row;align-items:center;gap:8px;overflow-x:auto}
+ .logo{padding:0 6px 0 0}.logo small,.sidefoot .who{display:none}
+ nav{flex-direction:row}nav button{white-space:nowrap;padding:8px 11px}
+ .sidefoot{margin:0 0 0 auto;border:0;padding:0}.sidefoot button{margin:0;width:auto;white-space:nowrap}
+ input,select,textarea{font-size:16px}
+ main{padding:14px 12px calc(50px + env(safe-area-inset-bottom))}
+ aside{padding-top:calc(10px + env(safe-area-inset-top))}.top h2{font-size:22px}
+ .detail dl{grid-template-columns:105px 1fr}.hidem{display:none}
+}
+@media print{
+ aside,.noprint,.top button{display:none!important}.shell{display:block}main{padding:0;max-width:none}
+ body{background:#fff}.card,.kpi{box-shadow:none;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+
+<div id="loginView" class="login hide">
+  <div class="card">
+    <div class="logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#b8392a"/><path d="M12 40h40v3H12z" fill="#fff"/><path d="M16 38a16 16 0 0 1 32 0z" fill="#fff"/><circle cx="32" cy="21" r="3" fill="#e3a03a"/><path d="M10 46h44" stroke="#e3a03a" stroke-width="3" stroke-linecap="round"/></svg>
+      <div><b>Restaurant Control</b><small>Management System</small></div>
+    </div>
+    <label>Username</label><input id="lu" autocomplete="username">
+    <label>Password</label><input id="lp" type="password" autocomplete="current-password">
+    <p class="err" id="le"></p>
+    <button style="width:100%;margin-top:6px" onclick="login()">Sign in</button>
+  </div>
+</div>
+
+<div id="appView" class="shell hide">
+  <aside>
+    <div class="logo">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="#b8392a"/><path d="M12 40h40v3H12z" fill="#fff"/><path d="M16 38a16 16 0 0 1 32 0z" fill="#fff"/><circle cx="32" cy="21" r="3" fill="#e3a03a"/><path d="M10 46h44" stroke="#e3a03a" stroke-width="3" stroke-linecap="round"/></svg>
+      <div><b>Restaurant Control</b><small>Management System</small></div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidefoot"><div class="who" id="who"></div><button id="installBtn" class="hide" onclick="installApp()" style="margin-bottom:6px;background:var(--gold);color:#2a1c14">Install app</button><button onclick="pwDialog()" style="margin-bottom:6px">Password</button><button onclick="logout()">Log out</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+let me=null, cfg={currency:'AED',today:'',categories:[]}, branches=[], page='dashboard', cache={}, timer=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const cur=n=>`<span class="${n<0?'neg':''}">${fmt(n)}</span>`;
+const ymd=d=>d.toISOString().slice(0,10);
+const addDays=(s,n)=>{const d=new Date(s+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return ymd(d)};
+const mondayOf=s=>addDays(s,-((new Date(s+'T00:00:00Z').getUTCDay()+6)%7));
+const monthStart=s=>s.slice(0,8)+'01';
+const monthEnd=s=>{const d=new Date(monthStart(s)+'T00:00:00Z');d.setUTCMonth(d.getUTCMonth()+1);d.setUTCDate(0);return ymd(d)};
+const isAdmin=()=>me&&me.role==='admin', isMgr=()=>me&&me.role==='manager', isView=()=>me&&me.role==='user';
+const roleName=r=>({admin:'Administrator',manager:'Branch manager',user:'Viewer'}[r]);
+
+async function api(url,method='GET',body){
+  const r=await fetch(url,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===401&&me&&url!=='/api/login'){me=null;show();}
+  if(!r.ok) throw new Error(j.error||'Something went wrong');
+  return j;
+}
+async function show(){
+  $('#loginView').classList.toggle('hide',!!me);
+  $('#appView').classList.toggle('hide',!me);
+  if(!me) return;
+  cfg=await api('/api/config');
+  $('#who').textContent=me.username+' · '+roleName(me.role);
+  const items=[['dashboard','▦','Dashboard']];
+  if(isAdmin()||isMgr()) items.push(['sales','◆','Daily sales'],['expenses','▤','Expenses']);
+  items.push(['reports','▥','Reports']);
+  if(isAdmin()||isView()) items.push(['employees','☺','Employees'],['alerts','⚠','Passport & visa']);
+  if(isAdmin()) items.push(['users','⚿','Users'],['branches','⌂','Branches']);
+  $('#nav').innerHTML=items.map(([k,i,l])=>`<button data-k="${k}" onclick="go('${k}')"><span>${i}</span>${l}</button>`).join('');
+  go('dashboard');
+}
+async function go(k,arg){
+  page=k;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+  try{
+    branches=await api('/api/branches');
+    await ({dashboard,sales:salesPage,expenses:expensesPage,reports:reportsPage,employees:employeesPage,alerts:alertsPage,users:usersPage,branches:branchesPage}[k])(arg);
+  }catch(e){ $('#main').innerHTML=`<div class="card"><p class="err">${esc(e.message)}</p></div>`; }
+  window.scrollTo(0,0);
+}
+const head=(t,extra='')=>`<div class="top"><h2>${t}</h2>${extra}</div>`;
+const branchOpts=(sel,all)=>(all?'<option value="">All branches</option>':'')+branches.map(b=>`<option value="${b.id}" ${b.id==sel?'selected':''}>${esc(b.name)}</option>`).join('');
+
+/* ---------------- login ---------------- */
+async function login(){
+  try{ me=await api('/api/login','POST',{username:$('#lu').value,password:$('#lp').value}); $('#lp').value=''; $('#le').textContent=''; show(); }
+  catch(e){ $('#le').textContent=e.message; }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!me&&document.activeElement.closest('.login')) login(); });
+async function logout(){ await api('/api/logout','POST'); me=null; show(); }
+async function pwDialog(){
+  const c=prompt('Current password:'); if(!c) return;
+  const n=prompt('New password (at least 8 characters):'); if(!n) return;
+  try{ await api('/api/me/password','POST',{current:c,next:n}); alert('Password changed'); }catch(e){alert(e.message);}
+}
+
+/* ---------------- dashboard ---------------- */
+async function dashboard(){
+  const d=await api('/api/dashboard');
+  if(d.noBranch){ $('#main').innerHTML=head('Dashboard')+'<div class="card"><p>No branch is assigned to your account yet. Please ask the administrator.</p></div>'; return; }
+  const c=d.currency, max=Math.max(1,...d.last14.map(x=>x.income));
+  const diff=d.todaySales-d.yesterdaySales;
+  $('#main').innerHTML=head('Dashboard',`<span class="muted">${esc(d.today)}</span>`)+`
+  <div class="kpis">
+    <div class="kpi"><small>Today's sales</small><b>${c} ${fmt(d.todaySales)}</b><span>Yesterday ${fmt(d.yesterdaySales)} (${diff>=0?'+':''}${fmt(diff)})</span></div>
+    <div class="kpi g"><small>Income this month</small><b>${c} ${fmt(d.mtd.income)}</b><span>Month to date</span></div>
+    <div class="kpi r"><small>Expenses this month</small><b>${c} ${fmt(d.mtd.expenses)}</b><span>${d.mtd.payrollIncluded?'Including payroll':'Payroll not included'}</span></div>
+    <div class="kpi d"><small>Profit this month</small><b class="${d.mtd.profit<0?'neg':''}">${c} ${fmt(d.mtd.profit)}</b><span>Income minus expenses</span></div>
+  </div>
+  ${d.alerts&&(d.alerts.expired||d.alerts.soon)?`<div class="card" style="border-left:5px solid var(--brand)"><b>Passport / visa attention:</b> <span class="tag bad">${d.alerts.expired} expired</span> <span class="tag warn">${d.alerts.soon} expiring soon</span> <button class="sm sec" style="float:right" onclick="go('alerts')">View</button></div>`:''}
+  ${d.missingToday&&d.missingToday.length?`<div class="card"><h3>Sales not entered yet today (${d.missingToday.length})</h3>${d.missingToday.map(n=>`<span class="pill" style="background:#efe7d8;color:var(--ink)">${esc(n)}</span>`).join('')}</div>`:''}
+  <div class="card"><h3>Sales – last 14 days</h3><div class="bars">${d.last14.map(x=>`<div title="${x.date}: ${fmt(x.income)}"><i style="height:${Math.max(1,x.income/max*100)}%"></i>${x.date.slice(8)}</div>`).join('')}</div></div>
+  ${!isMgr()?`<div class="card"><h3>Top branches this month</h3><div class="scroll"><table><tr><th>Branch</th><th class="n">Income</th><th class="n">Profit</th><th></th></tr>
+  ${d.topBranches.map(b=>`<tr><td>${esc(b.name)}</td><td class="n">${fmt(b.income)}</td><td class="n">${cur(b.profit)}</td><td><div class="hbar"><i style="width:${d.topBranches[0].income?b.income/d.topBranches[0].income*100:0}%"></i></div></td></tr>`).join('')}</table></div></div>`:''}`;
+}
+
+/* ---------------- daily sales ---------------- */
+async function salesPage(date){
+  date=date||cfg.today;
+  const rows=await api('/api/sales?date='+date), by={}; rows.forEach(r=>by[r.branch_id]=r);
+  const list=branches;
+  $('#main').innerHTML=head('Daily sales')+`
+  <div class="card"><div class="row">
+    <div class="auto"><button class="sec" onclick="salesPage('${addDays(date,-1)}')">←</button></div>
+    <div><label style="margin-top:0">Date</label><input type="date" id="sd" value="${date}" max="${cfg.today}" onchange="salesPage(this.value)"></div>
+    <div class="auto"><button class="sec" onclick="salesPage('${addDays(date,1)}')" ${date>=cfg.today?'disabled':''}>→</button></div>
+    <div class="auto"><button class="sec" onclick="salesPage('${cfg.today}')">Today</button></div>
+  </div>
+  ${isMgr()?'<p class="muted" style="margin-bottom:0">You can enter or change today and the previous 14 days.</p>':''}</div>
+  <div class="card"><div class="scroll"><table id="st"><tr><th>Branch</th><th class="n">Cash</th><th class="n">Card</th><th class="n">Delivery apps</th><th class="n">Other</th><th class="n">Total</th><th>Notes</th></tr>
+  ${list.map(b=>{const r=by[b.id]||{};const f=k=>`<td><input type="number" min="0" step="0.01" data-b="${b.id}" data-k="${k}" value="${r[k]||''}" oninput="rowTot(${b.id})" style="min-width:90px;text-align:right"></td>`;
+   return `<tr><td><b>${esc(b.name)}</b><br>${by[b.id]?'<span class="tag ok">entered</span>':'<span class="tag">not entered</span>'}</td>${f('cash')}${f('card')}${f('delivery')}${f('other')}<td class="n" id="t${b.id}">0.00</td><td><input data-b="${b.id}" data-k="notes" value="${esc(r.notes||'')}" style="min-width:140px"></td></tr>`}).join('')}
+  <tr class="tot"><td>TOTAL</td><td class="n" id="tc"></td><td class="n" id="tk"></td><td class="n" id="td"></td><td class="n" id="to"></td><td class="n" id="tt"></td><td></td></tr></table></div>
+  <p class="err" id="se"></p><button onclick="saveSales('${date}')">Save sales for ${date}</button></div>`;
+  list.forEach(b=>rowTot(b.id,true)); sumSales();
+}
+function val(b,k){ const e=document.querySelector(`[data-b="${b}"][data-k="${k}"]`); return e?Number(e.value)||0:0; }
+function rowTot(b,quiet){ const t=['cash','card','delivery','other'].reduce((a,k)=>a+val(b,k),0); const e=$('#t'+b); if(e) e.textContent=fmt(t); if(!quiet) sumSales(); }
+function sumSales(){
+  const s=k=>branches.reduce((a,b)=>a+val(b.id,k),0);
+  $('#tc').textContent=fmt(s('cash'));$('#tk').textContent=fmt(s('card'));$('#td').textContent=fmt(s('delivery'));$('#to').textContent=fmt(s('other'));
+  $('#tt').textContent=fmt(s('cash')+s('card')+s('delivery')+s('other'));
+}
+async function saveSales(date){
+  const rows=branches.map(b=>{const n=document.querySelector(`[data-b="${b.id}"][data-k="notes"]`);return {branch_id:b.id,cash:val(b.id,'cash'),card:val(b.id,'card'),delivery:val(b.id,'delivery'),other:val(b.id,'other'),notes:n?n.value:''};});
+  try{ const r=await api('/api/sales/bulk','POST',{date,rows}); alert('Saved '+r.saved+' branch(es) for '+date); salesPage(date); }
+  catch(e){ $('#se').textContent=e.message; }
+}
+
+/* ---------------- expenses ---------------- */
+async function expensesPage(opts){
+  opts=opts||{}; const from=opts.from||monthStart(cfg.today), to=opts.to||cfg.today, br=opts.branch||'';
+  const list=await api(`/api/expenses?from=${from}&to=${to}&branch=${br}`);
+  const total=list.reduce((a,x)=>a+x.amount,0);
+  $('#main').innerHTML=head('Expenses')+`
+  <div class="card"><h3>Add an expense</h3><div class="grid">
+    <div><label>Branch</label><select id="xb">${isMgr()?branchOpts(branches[0]&&branches[0].id):'<option value="">Choose…</option>'+branchOpts()}</select></div>
+    <div><label>Date</label><input type="date" id="xd" value="${cfg.today}" max="${cfg.today}"></div>
+    <div><label>Category</label><select id="xc">${cfg.categories.map(c=>`<option>${esc(c)}</option>`).join('')}</select></div>
+    <div><label>Amount (${esc(cfg.currency)})</label><input type="number" id="xa" min="0" step="0.01"></div>
+    <div style="grid-column:1/-1"><label>Description</label><input id="xn" placeholder="e.g. vegetables from market"></div></div>
+    <p class="err" id="xe"></p><button onclick="addExpense()">Add expense</button>
+    <p class="muted">Staff salaries are calculated automatically from the Employees records – don't enter them here.</p></div>
+  <div class="card"><div class="row">
+    <div><label style="margin-top:0">From</label><input type="date" id="ef" value="${from}"></div>
+    <div><label style="margin-top:0">To</label><input type="date" id="et" value="${to}"></div>
+    ${isMgr()?'':`<div><label style="margin-top:0">Branch</label><select id="eb">${branchOpts(br,true)}</select></div>`}
+    <div class="auto"><button class="sec" onclick="expensesPage({from:$('#ef').value,to:$('#et').value,branch:${isMgr()?"''":"$('#eb').value"}})">Show</button></div></div>
+  <p class="muted">${list.length} item(s) · Total <b>${esc(cfg.currency)} ${fmt(total)}</b></p>
+  <div class="scroll"><table><tr><th>Date</th><th>Branch</th><th>Category</th><th>Description</th><th class="n">Amount</th><th></th></tr>
+  ${list.map(x=>`<tr><td>${x.date}</td><td>${esc(x.branch_name)}</td><td>${esc(x.category)}</td><td>${esc(x.description)}</td><td class="n">${fmt(x.amount)}</td><td><button class="danger sm" onclick="delExpense(${x.id})">Delete</button></td></tr>`).join('')||'<tr><td colspan="6" class="muted">No expenses in this period.</td></tr>'}</table></div></div>`;
+}
+async function addExpense(){
+  try{ await api('/api/expenses','POST',{branch_id:$('#xb').value,date:$('#xd').value,category:$('#xc').value,amount:$('#xa').value,description:$('#xn').value}); expensesPage({from:$('#ef')?.value,to:$('#et')?.value}); }
+  catch(e){ $('#xe').textContent=e.message; }
+}
+async function delExpense(id){ if(!confirm('Delete this expense?')) return; try{ await api('/api/expenses/'+id,'DELETE'); expensesPage({from:$('#ef').value,to:$('#et').value,branch:$('#eb')?$('#eb').value:''}); }catch(e){alert(e.message);} }
+
+/* ---------------- reports ---------------- */
+function presets(){
+  const t=cfg.today, mon=mondayOf(t), lm=addDays(monthStart(t),-1);
+  return [['Today',t,t],['Yesterday',addDays(t,-1),addDays(t,-1)],['This week',mon,addDays(mon,6)],['Last week',addDays(mon,-7),addDays(mon,-1)],['This month',monthStart(t),monthEnd(t)],['Last month',monthStart(lm),lm]];
+}
+async function reportsPage(){
+  const saved=(isAdmin()||isView())?await api('/api/reports/saved'):[];
+  cache.presets=presets();
+  $('#main').innerHTML=head('Reports','<button class="sec noprint" onclick="window.print()">Print / save as PDF</button>')+`
+  <div class="card noprint"><div class="chips">${cache.presets.map((p,i)=>`<button class="sec" onclick="usePreset(${i})">${p[0]}</button>`).join('')}</div>
+  <div class="row"><div><label>From</label><input type="date" id="rf" value="${monthStart(cfg.today)}"></div><div><label>To</label><input type="date" id="rt" value="${cfg.today}"></div>
+  ${isMgr()?'':`<div><label>Branch</label><select id="rb">${branchOpts('',true)}</select></div>`}
+  <div class="auto"><button onclick="runReport()">Show report</button></div><div class="auto"><button class="sec" onclick="csvReport()">Download Excel</button></div></div></div>
+  <div id="rout"></div>
+  ${(isAdmin()||isView())?`<div class="card noprint"><h3>Automatic weekly &amp; monthly reports</h3>
+   <p class="muted">Created automatically after each week (Mon–Sun) and each month ends. Click one to open it.${isAdmin()?' <button class="sm sec" onclick="regen()">Refresh latest now</button>':''}</p>
+   <div class="scroll"><table><tr><th>Type</th><th>Period</th><th>Created</th></tr>${saved.map(s=>`<tr class="click" onclick="openSaved(${s.id})"><td><span class="tag ${s.type==='monthly'?'warn':''}">${s.type}</span></td><td>${s.period_start} → ${s.period_end}</td><td class="muted">${esc(s.created_at)}</td></tr>`).join('')||'<tr><td colspan="3" class="muted">Reports will appear here once sales have been entered and a week or month has finished.</td></tr>'}</table></div></div>`:''}`;
+  runReport();
+}
+function usePreset(i){ const p=cache.presets[i]; $('#rf').value=p[1]; $('#rt').value=p[2]; runReport(); }
+function rq(){ return `from=${$('#rf').value}&to=${$('#rt').value}&branch=${$('#rb')?$('#rb').value:''}`; }
+async function runReport(){ try{ renderReport(await api('/api/reports/live?'+rq())); }catch(e){ $('#rout').innerHTML=`<div class="card"><p class="err">${esc(e.message)}</p></div>`; } }
+function csvReport(){ location.href='/api/reports/csv?'+rq(); }
+async function openSaved(id){ try{ renderReport(await api('/api/reports/saved/'+id),true,id); window.scrollTo(0,0);}catch(e){alert(e.message);} }
+async function regen(){ try{ await api('/api/reports/run','POST'); reportsPage(); }catch(e){alert(e.message);} }
+function renderReport(d,saved,id){
+  const c=d.currency, t=d.total, cats=d.categories.filter(k=>t.expenseByCat[k]);
+  const title=saved?`${d.type==='monthly'?'Monthly':'Weekly'} report`:'Report';
+  $('#rout').innerHTML=`
+  <div class="card"><h3 style="font-size:20px">Restaurant Control – ${title}: ${d.from} to ${d.to} <span class="muted">(${d.days} day${d.days>1?'s':''}, ${esc(c)})</span></h3>
+  ${saved?`<p class="noprint" style="margin-top:0"><button class="sec sm" onclick="location.href='/api/reports/saved/${id}/csv'">Download this report (Excel)</button></p>`:''}
+  <div class="kpis" style="margin-bottom:0">
+   <div class="kpi g"><small>Total income</small><b>${fmt(t.income)}</b></div>
+   <div class="kpi r"><small>Total expenses</small><b>${fmt(t.totalExpenses)}</b><span>${d.payrollIncluded?`Operating ${fmt(t.expenses)} + payroll ${fmt(t.payroll)}`:'Payroll not included'}</span></div>
+   <div class="kpi d"><small>Profit</small><b class="${t.profit<0?'neg':''}">${fmt(t.profit)}</b></div></div></div>
+  <div class="card"><h3>Income, expenses and profit by branch</h3><div class="scroll"><table>
+  <tr><th>Branch</th><th class="n">Cash</th><th class="n">Card</th><th class="n">Delivery</th><th class="n">Other</th><th class="n">Income</th><th class="n">Expenses</th><th class="n">Payroll</th><th class="n">Profit</th></tr>
+  ${d.branches.map(b=>`<tr><td>${esc(b.name)}</td><td class="n">${fmt(b.cash)}</td><td class="n">${fmt(b.card)}</td><td class="n">${fmt(b.delivery)}</td><td class="n">${fmt(b.other)}</td><td class="n"><b>${fmt(b.income)}</b></td><td class="n">${fmt(b.expenses)}</td><td class="n">${fmt(b.payroll)}</td><td class="n">${cur(b.profit)}</td></tr>`).join('')}
+  <tr class="tot"><td>TOTAL</td><td class="n">${fmt(t.cash)}</td><td class="n">${fmt(t.card)}</td><td class="n">${fmt(t.delivery)}</td><td class="n">${fmt(t.other)}</td><td class="n">${fmt(t.income)}</td><td class="n">${fmt(t.expenses)}</td><td class="n">${fmt(t.payroll)}</td><td class="n">${cur(t.profit)}</td></tr></table></div>
+  ${d.payrollIncluded?'<p class="muted">Payroll = monthly salaries from the Employees records, pro-rated for the days in this period.</p>':''}</div>
+  ${cats.length?`<div class="card"><h3>Expenses by category</h3><div class="scroll"><table><tr><th>Branch</th>${cats.map(k=>`<th class="n">${esc(k)}</th>`).join('')}<th class="n">Total</th></tr>
+  ${d.branches.filter(b=>b.expenses).map(b=>`<tr><td>${esc(b.name)}</td>${cats.map(k=>`<td class="n">${fmt(b.expenseByCat[k]||0)}</td>`).join('')}<td class="n"><b>${fmt(b.expenses)}</b></td></tr>`).join('')}
+  <tr class="tot"><td>TOTAL</td>${cats.map(k=>`<td class="n">${fmt(t.expenseByCat[k]||0)}</td>`).join('')}<td class="n">${fmt(t.expenses)}</td></tr></table></div></div>`:''}`;
+}
+
+/* ---------------- employees ---------------- */
+function expiry(d){
+  if(!d) return '';
+  const days=Math.floor((new Date(d)-new Date())/864e5);
+  if(days<0) return `<span class="tag bad">${esc(d)} · expired</span>`;
+  if(days<=90) return `<span class="tag warn">${esc(d)} · ${days} days left</span>`;
+  return `<span class="tag ok">${esc(d)}</span>`;
+}
+function employeesPage(){
+  $('#main').innerHTML=head('Employees',(isAdmin()?'<button onclick="empForm()">+ Add employee</button>':'')+'<button class="sec" onclick="location.href=\'/api/employees/csv\'">Download list (Excel)</button>')+`
+  <div class="card"><div class="row"><div style="flex:3"><input id="q" placeholder="Search by name, employee code or passport no…" oninput="clearTimeout(timer);timer=setTimeout(loadEmp,250)"></div>
+  <div><select id="bf" onchange="loadEmp()">${branchOpts('',true)}</select></div></div></div><div class="card" id="list"></div>`;
+  loadEmp();
+}
+async function loadEmp(){
+  const rows=await api('/api/employees?q='+encodeURIComponent($('#q').value)+'&branch='+($('#bf').value||''));
+  $('#list').innerHTML=rows.length?`<div class="muted" style="margin-bottom:6px">${rows.length} employee(s)</div><div class="scroll"><table><tr><th>Name</th><th class="hidem">Code</th><th>Branch</th><th class="hidem">Job</th><th class="hidem">Visa expiry</th></tr>
+  ${rows.map(r=>`<tr class="click" onclick="detail(${r.id})"><td><b>${esc(r.name)}</b></td><td class="hidem">${esc(r.emp_code)}</td><td>${esc(r.branch_name)}</td><td class="hidem">${esc(r.job_title)}</td><td class="hidem">${expiry(r.visa_expiry)}</td></tr>`).join('')}</table></div>`:'<p class="muted">No employees found.</p>';
+}
+async function detail(id){
+  const e=await api('/api/employees/'+id); cache.emp=e;
+  const sal=e.salary==null?'':fmt(e.salary)+' '+cfg.currency+' / month';
+  const it=(k,v)=>`<dt>${k}</dt><dd>${v||'<span class="muted">—</span>'}</dd>`;
+  $('#main').innerHTML=head(esc(e.name),`<button class="sec" onclick="go('employees')">← Back</button>${isAdmin()?`<button onclick="empForm(${e.id})">Edit</button><button class="danger" onclick="delEmp(${e.id})">Delete</button>`:''}`)+`
+  <div class="card detail"><h3>Employee</h3><dl>${it('Employee code',esc(e.emp_code))}${it('Job title',esc(e.job_title))}${it('Phone',esc(e.phone))}${it('Email',esc(e.email))}${it('Nationality',esc(e.nationality))}</dl>
+  <h3>Work</h3><dl>${it('Branch',esc(e.branch_name))}${it('Work location',esc(e.work_location))}${it('Salary',esc(sal))}</dl>
+  <h3>Passport</h3><dl>${it('Passport no.',esc(e.passport_no))}${it('Passport expiry',expiry(e.passport_expiry))}</dl>
+  <h3>Visa</h3><dl>${it('Visa type',esc(e.visa_type))}${it('Visa no.',esc(e.visa_no))}${it('Visa expiry',expiry(e.visa_expiry))}</dl>
+  <h3>Notes</h3><p>${esc(e.notes)||'<span class="muted">—</span>'}</p></div>`;
+}
+async function empForm(id){
+  const e=id?await api('/api/employees/'+id):{};
+  const f=(k,l,t='text')=>`<div><label>${l}</label><input id="f_${k}" type="${t}" value="${esc(e[k])}"></div>`;
+  $('#main').innerHTML=head(id?'Edit employee':'Add employee')+`<div class="card"><div class="grid">${f('name','Full name *')}${f('emp_code','Employee code')}${f('job_title','Job title')}${f('phone','Phone')}${f('email','Email','email')}${f('nationality','Nationality')}
+  <div><label>Branch</label><select id="f_branch_id"><option value="">—</option>${branchOpts(e.branch_id)}</select></div>${f('work_location','Work location')}${f('salary','Monthly salary ('+cfg.currency+')','number')}
+  ${f('passport_no','Passport no.')}${f('passport_expiry','Passport expiry','date')}${f('visa_type','Visa type')}${f('visa_no','Visa no.')}${f('visa_expiry','Visa expiry','date')}</div>
+  <label>Notes</label><textarea id="f_notes" rows="3">${esc(e.notes)}</textarea><p class="err" id="fe"></p>
+  <button onclick="saveEmp(${id||0})">Save</button> <button class="sec" onclick="${id?`detail(${id})`:`go('employees')`}">Cancel</button></div>`;
+}
+async function saveEmp(id){
+  const b={}; ['name','emp_code','job_title','phone','email','nationality','branch_id','work_location','salary','passport_no','passport_expiry','visa_type','visa_no','visa_expiry','notes'].forEach(k=>b[k]=$('#f_'+k).value);
+  try{ const r=id?await api('/api/employees/'+id,'PUT',b):await api('/api/employees','POST',b); detail(id||r.id); }catch(e){ $('#fe').textContent=e.message; }
+}
+async function delEmp(id){ if(!confirm('Delete '+(cache.emp?cache.emp.name:'this employee')+'? This cannot be undone.')) return; await api('/api/employees/'+id,'DELETE'); go('employees'); }
+
+/* ---------------- alerts + settings ---------------- */
+async function alertsPage(days){
+  const a=await api('/api/alerts'+(days?'?days='+days:'')), s=a.settings, win=days?Number(days):Math.max(...a.thresholds);
+  $('#main').innerHTML=head('Passport & visa report','<button class="noprint" onclick="downloadAlerts()">Download Excel</button>')+`
+  <div class="card noprint"><div class="row"><div><label style="margin-top:0">Show documents expired or expiring within this many days</label><input type="number" id="aw" min="0" max="730" value="${win}"></div>
+  <div class="auto"><button class="sec" onclick="alertsPage($('#aw').value)">Show</button></div></div>
+  <div class="chips">${[30,60,90,180,365].map(n=>`<button class="sec" onclick="alertsPage(${n})">${n} days</button>`).join('')}</div></div>
+  <div class="card"><h3>Needs attention (${a.items.length}) – expired or expiring within ${win} days</h3><div class="scroll"><table><tr><th>Employee</th><th>Branch</th><th>Document</th><th>Number</th><th>Expiry</th><th>Status</th></tr>
+  ${a.items.map(i=>`<tr class="click" onclick="detail(${i.emp_id})"><td><b>${esc(i.name)}</b></td><td>${esc(i.branch_name)}</td><td>${i.kind==='visa'?'Visa':'Passport'}</td><td>${esc(i.number)}</td><td>${esc(i.expiry)}</td>
+  <td>${i.days<0?`<span class="tag bad">expired ${-i.days} days ago</span>`:`<span class="tag warn">${i.days} days left</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="muted">Nothing is expiring in this period.</td></tr>'}</table></div></div>
+  ${s?`<div class="card noprint"><h3>Settings</h3>
+   <div class="grid"><div><label>Dashboard warning stages (days)</label><input id="sdy" value="${esc(s.alert_days)}"></div><div><label>Currency</label><input id="scu" value="${esc(s.currency)}"></div></div>
+   <p class="muted">The dashboard warns about documents expiring within the largest number above (default 60 days).</p>
+   <p class="err" id="sme"></p><button onclick="saveSettings()">Save settings</button></div>`:''}`;
+}
+function downloadAlerts(){ location.href='/api/alerts/csv?days='+($('#aw').value||''); }
+async function saveSettings(){
+  try{ await api('/api/settings','PUT',{alert_days:$('#sdy').value,currency:$('#scu').value}); cfg=await api('/api/config'); alert('Settings saved'); alertsPage(); }
+  catch(e){ $('#sme').textContent=e.message; }
+}
+
+/* ---------------- users ---------------- */
+async function usersPage(){
+  const us=await api('/api/users'); cache.users=us;
+  $('#main').innerHTML=head('Users')+`<div class="card"><h3>Create user</h3>
+  <div class="row"><div><label>Username</label><input id="nu"></div><div><label>Password (min 8)</label><input id="np" type="password"></div>
+  <div><label>Role</label><select id="nr" onchange="$('#nbw').classList.toggle('hide',this.value!=='manager')"><option value="user">Viewer – read only (employees &amp; reports)</option><option value="manager">Branch manager – enters sales &amp; expenses</option><option value="admin">Administrator – full control</option></select></div>
+  <div id="nbw" class="hide"><label>Branch</label><select id="nb">${branchOpts()}</select></div></div>
+  <p class="err" id="ue"></p><button onclick="addUser()">Create user</button></div>
+  <div class="card"><div class="scroll"><table><tr><th>Username</th><th>Role</th><th>Branch</th><th></th></tr>
+  ${us.map(u=>`<tr><td>${esc(u.username)}</td><td>${roleName(u.role)}</td><td>${esc(u.branch_name)}</td><td style="text-align:right;white-space:nowrap"><button class="sec sm" onclick="resetPw(${u.id})">Reset password</button> ${u.id!==me.id?`<button class="danger sm" onclick="delUser(${u.id})">Delete</button>`:''}</td></tr>`).join('')}</table></div></div>`;
+}
+async function addUser(){ try{ await api('/api/users','POST',{username:$('#nu').value,password:$('#np').value,role:$('#nr').value,branch_id:$('#nb').value}); usersPage(); }catch(e){ $('#ue').textContent=e.message; } }
+const uname=id=>(cache.users.find(u=>u.id===id)||{}).username;
+async function resetPw(id){ const p=prompt('New password for '+uname(id)+' (min 8 characters):'); if(!p) return; try{ await api('/api/users/'+id+'/password','PUT',{password:p}); alert('Password updated'); }catch(e){alert(e.message);} }
+async function delUser(id){ if(!confirm('Delete user '+uname(id)+'?')) return; try{ await api('/api/users/'+id,'DELETE'); usersPage(); }catch(e){alert(e.message);} }
+
+/* ---------------- branches ---------------- */
+function branchesPage(){
+  $('#main').innerHTML=head('Branches ('+branches.length+')')+`<div class="card"><div class="row"><div style="flex:3"><input id="bn" placeholder="New branch name"></div><div class="auto"><button onclick="addBranch()">Add branch</button></div></div><p class="err" id="be"></p>
+  <div class="scroll"><table><tr><th>Name</th><th class="n">Employees</th><th></th></tr>${branches.map(b=>`<tr><td>${esc(b.name)}</td><td class="n">${b.employees}</td><td style="text-align:right"><button class="sec sm" onclick="renameBranch(${b.id})">Rename</button></td></tr>`).join('')}</table></div></div>`;
+}
+async function addBranch(){ try{ await api('/api/branches','POST',{name:$('#bn').value}); go('branches'); }catch(e){ $('#be').textContent=e.message; } }
+async function renameBranch(id){ const b=branches.find(x=>x.id===id); const v=prompt('Branch name:',b.name); if(!v) return; try{ await api('/api/branches/'+id,'PUT',{name:v}); go('branches'); }catch(e){alert(e.message);} }
+
+/* ---------------- install as app (PWA) ---------------- */
+let deferredInstall=null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredInstall=e; $('#installBtn').classList.remove('hide'); });
+window.addEventListener('appinstalled',()=>{ deferredInstall=null; $('#installBtn').classList.add('hide'); });
+async function installApp(){ if(!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall=null; $('#installBtn').classList.add('hide'); }
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+window.addEventListener('offline',()=>{ const m=document.querySelector('#main'); if(m&&me) m.insertAdjacentHTML('afterbegin','<div class="card" id="offl" style="border-left:5px solid var(--brand)">No internet connection. Restaurant Control needs the internet to show and save data.</div>'); });
+window.addEventListener('online',()=>{ const o=document.querySelector('#offl'); if(o) o.remove(); });
+
+(async()=>{ try{ me=await api('/api/me'); }catch{ me=null; } show(); })();
+</script>
+</body>
+</html>
